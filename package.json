@@ -1,8 +1,8 @@
 {
-  "name": "manage-school",
+  "name": "parking-management",
   "version": "0.0.1",
-  "description": "",
-  "author": "",
+  "description": "para parqueaderos que guardan negocios",
+  "author": "mario <mabg0630@gmail.com>",
   "private": true,
   "license": "UNLICENSED",
   "engines": {
@@ -78,5 +78,7 @@
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
-  }
+  },
+  "main": "main.ts",
+  "repository": "https://github.com/exde17/backParking.git"
 }
