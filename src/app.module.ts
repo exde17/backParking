@@ -5,6 +5,7 @@ import { UserModule } from './user/user.module';
 import { ClienteModule } from './cliente/cliente.module';
 import { PagoParcialModule } from './pago-parcial/pago-parcial.module';
 import { PagoTotalModule } from './pago-total/pago-total.module';
+import { PagoMasModule } from './pago-mas/pago-mas.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { PagoTotalModule } from './pago-total/pago-total.module';
     ClienteModule,
     PagoParcialModule,
     PagoTotalModule,
+    PagoMasModule,
   ],
 })
 export class AppModule {}

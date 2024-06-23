@@ -1,3 +1,4 @@
+import { PagoMa } from "src/pago-mas/entities/pago-ma.entity";
 import { PagoParcial } from "src/pago-parcial/entities/pago-parcial.entity";
 import { PagoTotal } from "src/pago-total/entities/pago-total.entity";
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
@@ -47,13 +48,13 @@ export class Cliente {
         nullable: true,
         default: false
     })
-    pagoCompleto: boolean
+    pago: boolean
 
     @Column('bool',{
         nullable: true,
         default: false
     })
-    pagoParcial: boolean
+    novedad: boolean 
 
     @Column('timestamp',{
         nullable: true,
@@ -72,6 +73,9 @@ export class Cliente {
 
     @OneToMany(()=> PagoTotal, (pagoTotal)=> pagoTotal.cliente)
     pagoTo: PagoParcial[];
+
+    @OneToMany(()=> PagoMa, (pagoMa)=> pagoMa.cliente)
+    pagoMas: PagoMa[];
 
 }
 
