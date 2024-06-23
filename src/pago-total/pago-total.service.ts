@@ -31,7 +31,18 @@ export class PagoTotalService {
 
   async findAll() {
     try {
-      return await this.pagoTotalRepository.find()
+      return await this.pagoTotalRepository.find({
+        relations: ['cliente'],
+        select: {
+          cliente: {
+            id: true,
+            nombre: true,
+            apellido: true
+          },
+          valor: true,
+          createdAt: true
+        }
+      })
     } catch (error) {
       return{
         message: 'Error en la obtencion de pagos',
