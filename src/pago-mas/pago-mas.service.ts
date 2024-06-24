@@ -24,7 +24,18 @@ export class PagoMasService {
 
   async findAll() {
     try {
-      return await this.pagoMaRepository.find();
+      return await this.pagoMaRepository.find({
+        relations: ['cliente'],
+        select: {
+          cliente: {
+            id: true,
+            nombre: true,
+            apellido: true
+          },
+          valor: true,
+          createdAt: true
+        }
+      });
       
     } catch (error) {
       return error;
@@ -37,6 +48,16 @@ export class PagoMasService {
       return await this.pagoMaRepository.findOne({
         where: {
           id
+        },
+        relations: ['cliente'],
+        select: {
+          cliente: {
+            id: true,
+            nombre: true,
+            apellido: true
+          },
+          valor: true,
+          createdAt: true
         }
       
       });

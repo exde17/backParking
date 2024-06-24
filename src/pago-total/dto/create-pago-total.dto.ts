@@ -1,11 +1,14 @@
-import { IsNumber, IsString } from "class-validator";
+import { IsNumber, IsString, IsUUID } from "class-validator";
 import { Cliente } from "src/cliente/entities/cliente.entity";
 
 export class CreatePagoTotalDto {
 
     @IsNumber()
-    readonly valor: number;
+    valor: number;
 
-    @IsString()
-    readonly cliente: Cliente;
+    // @IsString()
+    // cliente: Cliente;
+
+    @IsUUID()
+    cliente: string;
 }

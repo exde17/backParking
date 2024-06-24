@@ -30,7 +30,18 @@ export class PagoParcialService {
 
   async findAll() {
     try {
-      return await this.pagoParcialRepository.find()
+      return await this.pagoParcialRepository.find({
+        relations: ['cliente'],
+        select: {
+          cliente: {
+            id: true,
+            nombre: true,
+            apellido: true
+          },
+          valor: true,
+          createdAt: true
+        }
+      })
     } catch (error) {
       return{
         message: 'Error al obtener los pagos',
@@ -44,7 +55,17 @@ export class PagoParcialService {
   async findOne(id: string) {
     try {
       return await this.pagoParcialRepository.findOne({
-        where: {id}
+        where: {id},
+        relations: ['cliente'],
+        select: {
+          cliente: {
+            id: true,
+            nombre: true,
+            apellido: true
+          },
+          valor: true,
+          createdAt: true
+        }
       
       })
     } catch (error) {
