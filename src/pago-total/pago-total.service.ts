@@ -26,17 +26,15 @@ export class PagoTotalService {
       
       // consulto el valor que debe pagar el cliente
       const { cliente, ...create } = createPagoTotalDto
-      console.log('id del dto: ',cliente)
+      
       const valor = await this.clienteRepository.findOne({
         where: {id: cliente},
         // select: ['valor']
       })
 
-      console.log(valor.id)
-
       //comparo los valores para decidir donde va a guardar el pago
       if (createPagoTotalDto.valor === valor.valor) {
-        console.log('guardo en total')
+        
         const pago = this.pagoTotalRepository.create({
           valor: createPagoTotalDto.valor,
           cliente: { id: cliente }
@@ -50,7 +48,7 @@ export class PagoTotalService {
         await this.clienteRepository.save(valor);
 
         return{
-          message: 'Pago creado con exito',
+          message: 'Pago total creado con exito',
           // pago
         }
       }else if (createPagoTotalDto.valor < valor.valor) {
@@ -59,7 +57,7 @@ export class PagoTotalService {
         const resultado = valor.valor - createPagoTotalDto.valor
         //asigno el nuevo valor 
         createPagoTotalDto.valor = resultado
-        console.log('guardo en parcial: ', resultado)
+        
         //creo el pago parcial
         const pago = this.pagoParcialRepository.create({
           valor: createPagoTotalDto.valor,
@@ -73,7 +71,7 @@ export class PagoTotalService {
         valor.pago= true;
         await this.clienteRepository.save(valor);
         return{
-          message: 'Pago creado con exito',
+          message: 'Pago parcial creado con exito',
           // pago
         }
       }else if (createPagoTotalDto.valor > valor.valor) {
@@ -82,7 +80,7 @@ export class PagoTotalService {
         const resultado = createPagoTotalDto.valor - valor.valor
         //asigno el nuevo valor
         createPagoTotalDto.valor = resultado
-        console.log('guardo en mas: ', resultado)
+        
         //creo el pago mas
         const pago = this.pagoMaRepository.create({
           valor: createPagoTotalDto.valor,
@@ -96,7 +94,7 @@ export class PagoTotalService {
         valor.pago= true;
         await this.clienteRepository.save(valor);
         return{
-          message: 'Pago creado con exito',
+          message: 'Pago adelantado creado con exito',
           // pago
         }
       }
