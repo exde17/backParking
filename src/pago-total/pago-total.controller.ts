@@ -17,6 +17,12 @@ export class PagoTotalController {
     return this.pagoTotalService.findAll();
   }
 
+  //get que trae los valores de si pago, cuanto debe que esta en pago parcial y cuanto mas debe que esta en pago ma
+  @Get('valores/:id')
+  async findValores(@Param('id', ParseUUIDPipe) id: string) {
+    return this.pagoTotalService.findValores(id);
+  }
+
   @Get(':id')
   async findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.pagoTotalService.findOne(id);

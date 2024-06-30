@@ -19,7 +19,7 @@ export class ClienteService {
     @InjectRepository(PagoTotal)
     private readonly pagoTotalRepository: Repository<PagoTotal>,
     @InjectRepository(PagoMa)
-    private readonly pagoMasRepository: Repository<PagoMa>
+    private readonly pagoMasRepository: Repository<PagoMa>,
   ) { }
   async create(createClienteDto: CreateClienteDto) {
     try {
@@ -51,7 +51,8 @@ export class ClienteService {
         const pagoDiario = await this.pagoTotalRepository.findOne({
           where: { cliente: { id: item.id } }
         })
-        console.log("diario: ", pagoDiario)
+        console.log("item: ", item.id)
+        console.log("diario: ", item.valor)
 
         const debe = await this.pagoParcialRepository.findOne({
           where: {
@@ -67,9 +68,19 @@ export class ClienteService {
           }
         })
 
+        if(sobra || debe){
+          item.novedad = true;
+
+          await this.clienteRepository.update(item.id, item)
+        }else{
+          item.novedad = false;
+
+          await this.clienteRepository.update(item.id, item)
+        }
+
         console.log("sobra: ", sobra)
 
-        const opera = ((+(pagoDiario?.valor ?? 0)) + (+(debe?.valor ?? 0))) - (+(sobra?.valor ?? 0));
+        const opera = ((+(item?.valor ?? 0)) + (+(debe?.valor ?? 0))) - (+(sobra?.valor ?? 0));
 
         console.log("operacion: ", opera);
         inf = {

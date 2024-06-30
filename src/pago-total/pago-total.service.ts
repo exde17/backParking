@@ -3,11 +3,12 @@ import { CreatePagoTotalDto } from './dto/create-pago-total.dto';
 import { UpdatePagoTotalDto } from './dto/update-pago-total.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PagoTotal } from './entities/pago-total.entity';
-import { Repository } from 'typeorm';
+import { Repository, getConnection, getManager } from 'typeorm';
 import { Cliente } from 'src/cliente/entities/cliente.entity';
 import { equals } from 'class-validator';
 import { PagoParcial } from 'src/pago-parcial/entities/pago-parcial.entity';
 import { PagoMa } from 'src/pago-mas/entities/pago-ma.entity';
+import { DataSource } from 'typeorm';
 
 @Injectable()
 export class PagoTotalService {
@@ -19,101 +20,125 @@ export class PagoTotalService {
     @InjectRepository(PagoParcial)
     private readonly pagoParcialRepository: Repository <PagoParcial>,
     @InjectRepository(PagoMa)
-    private readonly pagoMaRepository: Repository <PagoMa>
+    private readonly pagoMaRepository: Repository <PagoMa>,
+    private dataSource: DataSource
   ){}
+  
+
   async create(createPagoTotalDto: CreatePagoTotalDto) {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+  
     try {
+      const { cliente, ...create } = createPagoTotalDto;
       
-      // consulto el valor que debe pagar el cliente
-      const { cliente, ...create } = createPagoTotalDto
-      
-      const valor = await this.clienteRepository.findOne({
+      // Asumiendo que tienes una entidad llamada Cliente y otra llamada PagoParcial y PagoMa
+      const valorDiario = await queryRunner.manager.findOne(Cliente, {
         where: {id: cliente},
-        // select: ['valor']
-      })
-
-      //comparo los valores para decidir donde va a guardar el pago
-      if (createPagoTotalDto.valor === valor.valor) {
-        
-        const pago = this.pagoTotalRepository.create({
-          valor: createPagoTotalDto.valor,
-          cliente: { id: cliente }
-        })
-
-        await this.pagoTotalRepository.save(pago)
-
-        valor.novedad= false;
-        await this.clienteRepository.save(valor);
-        valor.pago= true;
-        await this.clienteRepository.save(valor);
-
-        return{
-          message: 'Pago total creado con exito',
-          // pago
-        }
-      }else if (createPagoTotalDto.valor < valor.valor) {
-        
-        //calculo el valor restante
-        const resultado = valor.valor - createPagoTotalDto.valor
-        //asigno el nuevo valor 
-        createPagoTotalDto.valor = resultado
-        
-        //creo el pago parcial
-        const pago = this.pagoParcialRepository.create({
-          valor: createPagoTotalDto.valor,
-          cliente: { id: cliente }
-        })
-
-        await this.pagoParcialRepository.save(pago)
-
-        valor.novedad= true;
-        await this.clienteRepository.save(valor);
-        valor.pago= true;
-        await this.clienteRepository.save(valor);
-        return{
-          message: 'Pago parcial creado con exito',
-          // pago
-        }
-      }else if (createPagoTotalDto.valor > valor.valor) {
-        
-        //calculo el valor restante
-        const resultado = createPagoTotalDto.valor - valor.valor
-        //asigno el nuevo valor
-        createPagoTotalDto.valor = resultado
-        
-        //creo el pago mas
-        const pago = this.pagoMaRepository.create({
-          valor: createPagoTotalDto.valor,
-          cliente: { id: cliente }
-        })
-
-        await this.pagoMaRepository.save(pago)
-
-        valor.novedad= true;
-        await this.clienteRepository.save(valor);
-        valor.pago= true;
-        await this.clienteRepository.save(valor);
-        return{
-          message: 'Pago adelantado creado con exito',
-          // pago
-        }
-      }
-
-      // const pago = this.pagoTotalRepository.create(createPagoTotalDto)
-      // await this.pagoTotalRepository.save(pago)
-
-      return{
-        message: 'Pago creado con exito',
-        // pago
-      }
-    } catch (error) {
-      return{
-        message: 'Error en la creacion del pago',
-        error
-      }
+      });
+  
+      const valorDebe = await queryRunner.manager.findOne(PagoParcial, {
+        where: {cliente:{id: cliente}}
+      });
+  
+      const valorMas = await queryRunner.manager.findOne(PagoMa, {
+        where: {cliente:{id: cliente}}
+      });
+      console.log(valorDebe)
       
+      const valorTotal = ((+(valorDiario?.valor ?? 0)) + (+(valorDebe?.valor ?? 0)) - (+(valorMas?.valor ?? 0)));
+      console.log('valordiario: ', valorDiario?.valor,'--','valordebe: ',valorDebe?.valor,'--','valormas: ',valorMas?.valor)
+  
+      let pago;
+      console.log('pago: ',valorTotal)
+      //si paga todo se va por aqui
+      if (createPagoTotalDto.valor === valorTotal) {
+        pago = this.pagoTotalRepository.create({
+          valor: createPagoTotalDto.valor,
+          cliente: { id: cliente }
+        });
+
+        //elimino algun registro que exista tanto en debe como en sobra plaqta
+        if(valorDebe){
+          await queryRunner.manager.delete(PagoParcial, {
+            cliente: { id: cliente }
+          })
+        }
+        if(valorMas){
+          await queryRunner.manager.delete(PagoMa, {
+            cliente: { id: cliente }
+          })
+        }
+      } else if (createPagoTotalDto.valor < valorTotal)  { //si el pago es menor se viene por aca y actualiza la la tabla que debe
+        const resultado = valorTotal - createPagoTotalDto.valor;
+        //consulto el valor que se devia antes
+        const masdebe = await queryRunner.manager.findOne(PagoParcial,{
+          where: {cliente:{id: cliente}} 
+        })
+        
+        if(masdebe){
+          pago = this.pagoParcialRepository.create(
+            {
+              id: masdebe.id,
+              valor: resultado
+            }
+          )
+          
+        } else {
+          
+          pago = this.pagoParcialRepository.create(
+            {
+              // id: masdebe.id,
+              valor: resultado,
+              cliente: { id: cliente }
+            }
+          )
+        }
+
+        if(valorMas){
+          await queryRunner.manager.delete(PagoMa, {
+            cliente: { id: cliente }
+          })
+        }
+        
+      } else {
+        const resultado = createPagoTotalDto.valor - valorTotal;
+        pago = this.pagoMaRepository.create({
+          valor: resultado,
+          cliente: { id: cliente }
+        });
+
+        if(valorDebe){
+          await queryRunner.manager.delete(PagoParcial, {
+            cliente: { id: cliente }
+          })
+        }
+      }
+  
+      await queryRunner.manager.save(pago);
+  
+      valorDiario.novedad = createPagoTotalDto.valor !== valorTotal;
+      valorDiario.novedad = createPagoTotalDto.valor == valorTotal;
+      valorDiario.pago = true;
+      await queryRunner.manager.save(valorDiario);
+  
+      await queryRunner.commitTransaction();
+  
+      return {
+        message: 'Pago creado con éxito',
+      };
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      console.log(error)
+      return {
+        message: 'Error en la creación del pago',
+        error
+      };
+    } finally {
+      await queryRunner.release();
     }
-  }
+  }  
 
   async findAll() {
     try {
@@ -198,8 +223,41 @@ export class PagoTotalService {
       
     }
   }
+
+  async findValores(id: string) {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      // Cambia this.queryRunner.manager.findOne a queryRunner.manager.findOne
+      const pago = await queryRunner.manager.findOne(Cliente, {
+        where: {id},
+      });
+
+      const valorDebe = await queryRunner.manager.findOne(PagoParcial, {
+        where: {cliente:{id}}
+      });
+
+      const valorMas = await queryRunner.manager.findOne(PagoMa, {
+        where: {cliente:{id}}
+      });
+
+      await queryRunner.commitTransaction();
+
+      return {
+        pago: pago.pago,
+        debe: valorDebe?.valor?? 0,
+        adelantado: valorMas?.valor?? 0
+      }
+    } catch (error) {
+      return{
+        message: 'Error en la obtencion de valores',
+        error
+      }
+    }
+  }
 }
-function elseif(arg0: boolean) {
-  throw new Error('Function not implemented.');
-}
+// function elseif(arg0: boolean) {
+//   throw new Error('Function not implemented.');
+// }
 
