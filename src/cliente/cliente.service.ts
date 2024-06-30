@@ -47,13 +47,11 @@ export class ClienteService {
 
       const data = await Promise.all(clientes.map(async (item) => {
         let inf = {}
-
-        const pagoDiario = await this.pagoTotalRepository.findOne({
-          where: { cliente: { id: item.id } }
-        })
+        let opera = 0;
+        
         console.log("item: ", item.id)
         console.log("diario: ", item.valor)
-
+        
         const debe = await this.pagoParcialRepository.findOne({
           where: {
             cliente: { id: item.id }
@@ -79,14 +77,23 @@ export class ClienteService {
         }
 
         console.log("sobra: ", sobra)
+      
+        opera = ((+(item?.valor ?? 0)) + (+(debe?.valor ?? 0))) - (+(sobra?.valor ?? 0));
 
-        const opera = ((+(item?.valor ?? 0)) + (+(debe?.valor ?? 0))) - (+(sobra?.valor ?? 0));
+        // if(item.pago && item.novedad){
+        //   opera = +debe?.valor ?? 0;
+        //  }else{
+        //   opera = ((+(item?.valor ?? 0)) + (+(debe?.valor ?? 0))) - (+(sobra?.valor ?? 0));
+        //  }
 
         console.log("operacion: ", opera);
         inf = {
+          "id": item.id,
           "nombre": item.nombre,
           "valor": opera,
-          "novedad": item.novedad
+          "novedad": item.novedad,
+          "pago": item.pago,
+          "isActive": item.isActive,
         };
 
 
