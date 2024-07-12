@@ -6,6 +6,7 @@ import { ClienteModule } from './cliente/cliente.module';
 import { PagoParcialModule } from './pago-parcial/pago-parcial.module';
 import { PagoTotalModule } from './pago-total/pago-total.module';
 import { PagoMasModule } from './pago-mas/pago-mas.module';
+import { HistorialModule } from './historial/historial.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { PagoMasModule } from './pago-mas/pago-mas.module';
     PagoParcialModule,
     PagoTotalModule,
     PagoMasModule,
+    HistorialModule,
   ],
 })
 export class AppModule {}

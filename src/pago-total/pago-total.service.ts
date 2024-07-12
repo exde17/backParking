@@ -9,6 +9,7 @@ import { equals } from 'class-validator';
 import { PagoParcial } from 'src/pago-parcial/entities/pago-parcial.entity';
 import { PagoMa } from 'src/pago-mas/entities/pago-ma.entity';
 import { DataSource } from 'typeorm';
+import { Historial } from 'src/historial/entities/historial.entity';
 
 @Injectable()
 export class PagoTotalService {
@@ -21,6 +22,8 @@ export class PagoTotalService {
     private readonly pagoParcialRepository: Repository <PagoParcial>,
     @InjectRepository(PagoMa)
     private readonly pagoMaRepository: Repository <PagoMa>,
+    @InjectRepository(Historial)
+    private readonly historialRepository: Repository <Historial>,
     private dataSource: DataSource
   ){}
   
@@ -32,6 +35,7 @@ export class PagoTotalService {
   
     try {
       const { cliente, ...create } = createPagoTotalDto;
+      let valorTotal
       
       // Asumiendo que tienes una entidad llamada Cliente y otra llamada PagoParcial y PagoMa
       const valorDiario = await queryRunner.manager.findOne(Cliente, {
@@ -46,15 +50,29 @@ export class PagoTotalService {
         where: {cliente:{id: cliente}}
       });
       console.log(valorDebe)
+
+      //verifico si ya pago y debe pero quiere pagar lo que debe el mismo dia
+      if(valorDebe && valorDiario?.pago){
+        valorTotal = valorDebe.valor
+      }else{
+        valorTotal = ((+(valorDiario?.valor ?? 0)) + (+(valorDebe?.valor ?? 0)) - (+(valorMas?.valor ?? 0)));
+      }
       
-      const valorTotal = ((+(valorDiario?.valor ?? 0)) + (+(valorDebe?.valor ?? 0)) - (+(valorMas?.valor ?? 0)));
-      console.log('valordiario: ', valorDiario?.valor,'--','valordebe: ',valorDebe?.valor,'--','valormas: ',valorMas?.valor)
+      
+      //console.log('valordiario: ', valorDiario?.valor,'--','valordebe: ',valorDebe?.valor,'--','valormas: ',valorMas?.valor)
   
       let pago;
+      let historial;
       console.log('pago: ',valorTotal)
       //si paga todo se va por aqui
       if (createPagoTotalDto.valor === valorTotal) {
         pago = this.pagoTotalRepository.create({
+          valor: createPagoTotalDto.valor,
+          cliente: { id: cliente }
+        });
+
+        //guardo en historial para que este un registro de los pagos
+        historial = this.historialRepository.create({
           valor: createPagoTotalDto.valor,
           cliente: { id: cliente }
         });
@@ -70,6 +88,11 @@ export class PagoTotalService {
             cliente: { id: cliente }
           })
         }
+
+        //pongo en true el pago para que no se pueda volver a pagar
+        //valorDiario.pago = true;
+
+
       } else if (createPagoTotalDto.valor < valorTotal)  { //si el pago es menor se viene por aca y actualiza la la tabla que debe
         const resultado = valorTotal - createPagoTotalDto.valor;
         //consulto el valor que se devia antes
@@ -84,6 +107,12 @@ export class PagoTotalService {
               valor: resultado
             }
           )
+
+          //guardo en historial para que este un registro de los pagos
+          historial = this.historialRepository.create({
+            valor: createPagoTotalDto.valor,
+            cliente: { id: cliente }
+          });
           
         } else {
           
@@ -94,6 +123,11 @@ export class PagoTotalService {
               cliente: { id: cliente }
             }
           )
+          //guardo en historial para que este un registro de los pagos
+          historial = this.historialRepository.create({
+            valor: createPagoTotalDto.valor,
+            cliente: { id: cliente }
+          });
         }
 
         if(valorMas){
@@ -102,10 +136,36 @@ export class PagoTotalService {
           })
         }
         
-      } else {
+      } else { //si el valor que paga es mayor a lo que debe se va por aca
+        console.log('valor total: ', valorTotal)
+        console.log('valor que paga: ', createPagoTotalDto.valor)
         const resultado = createPagoTotalDto.valor - valorTotal;
+
+        console.log('resultado: ', resultado)
+        //verifico si existe un registro en la tabla de sobra plata para actualizarlo
+        const masdebe = await queryRunner.manager.findOne(PagoMa,{
+          where: {cliente:{id: cliente}} 
+        })
+
+        if(masdebe){
+          pago = this.pagoMaRepository.create(
+            {
+              id: masdebe.id,
+              valor: resultado //+ (+ masdebe.valor)
+            }
+          )
+        } else {
+
         pago = this.pagoMaRepository.create({
           valor: resultado,
+          cliente: { id: cliente }
+        
+        });
+      }
+
+        //guardo en historial para que este un registro de los pagos
+        historial = this.historialRepository.create({
+          valor: createPagoTotalDto.valor,
           cliente: { id: cliente }
         });
 
@@ -116,12 +176,19 @@ export class PagoTotalService {
         }
       }
   
+      //valorDiario.pago = true;
+      const elPago = this.clienteRepository.create({
+        pago: true,
+        id: cliente 
+      });
+      
       await queryRunner.manager.save(pago);
+      await queryRunner.manager.save(historial);
   
-      valorDiario.novedad = createPagoTotalDto.valor !== valorTotal;
-      valorDiario.novedad = createPagoTotalDto.valor == valorTotal;
-      valorDiario.pago = true;
-      await queryRunner.manager.save(valorDiario);
+      // valorDiario.novedad = createPagoTotalDto.valor !== valorTotal;
+      // valorDiario.novedad = createPagoTotalDto.valor == valorTotal;
+      
+      await queryRunner.manager.save(elPago);
   
       await queryRunner.commitTransaction();
   
@@ -139,6 +206,158 @@ export class PagoTotalService {
       await queryRunner.release();
     }
   }  
+
+  // async create(createPagoTotalDto: CreatePagoTotalDto) {
+  //   const queryRunner = this.dataSource.createQueryRunner();
+  //   await queryRunner.connect();
+  //   await queryRunner.startTransaction();
+  
+  //   try {
+  //     const { cliente, ...create } = createPagoTotalDto;
+  
+  //     // Retrieve the Cliente entity at the start
+  //     const clienteEntity = await queryRunner.manager.findOne(Cliente, {
+  //       where: { id: cliente },
+  //     });
+  
+  //     const valorDiario = clienteEntity; // Use the retrieved clienteEntity
+  //     const valorDebe = await queryRunner.manager.findOne(PagoParcial, {
+  //       where: { cliente: { id: cliente } },
+  //     });
+  
+  //     const valorMas = await queryRunner.manager.findOne(PagoMa, {
+  //       where: { cliente: { id: cliente } },
+  //     });
+  //     console.log(valorDebe);
+  
+  //     const valorTotal = ((+(valorDiario?.valor ?? 0)) + (+(valorDebe?.valor ?? 0)) - (+(valorMas?.valor ?? 0)));
+  //     console.log('valordiario: ', valorDiario?.valor, '--', 'valordebe: ', valorDebe?.valor, '--', 'valormas: ', valorMas?.valor);
+  
+  //     let pago;
+  //     let historial;
+  //     console.log('pago: ', valorTotal);
+  //     // Si paga todo se va por aquí
+  //     if (createPagoTotalDto.valor === valorTotal) {
+  //       pago = this.pagoTotalRepository.create({
+  //         valor: createPagoTotalDto.valor,
+  //         cliente: { id: cliente },
+  //       });
+  
+  //       // Guardo en historial para que este un registro de los pagos
+  //       historial = this.historialRepository.create({
+  //         valor: createPagoTotalDto.valor,
+  //         cliente: { id: cliente },
+  //       });
+  
+  //       // Elimino algún registro que exista tanto en debe como en sobra plata
+  //       if (valorDebe) {
+  //         await queryRunner.manager.delete(PagoParcial, {
+  //           cliente: { id: cliente },
+  //         });
+  //       }
+  //       if (valorMas) {
+  //         await queryRunner.manager.delete(PagoMa, {
+  //           cliente: { id: cliente },
+  //         });
+  //       }
+  //     } else if (createPagoTotalDto.valor < valorTotal) {
+  //       // Si el pago es menor se viene por acá y actualiza la tabla que debe
+  //       const resultado = valorTotal - createPagoTotalDto.valor;
+  //       // Consulto el valor que se debía antes
+  //       const masdebe = await queryRunner.manager.findOne(PagoParcial, {
+  //         where: { cliente: { id: cliente } },
+  //       });
+  
+  //       if (masdebe) {
+  //         pago = this.pagoParcialRepository.create({
+  //           id: masdebe.id,
+  //           valor: resultado,
+  //         });
+  
+  //         // Guardo en historial para que este un registro de los pagos
+  //         historial = this.historialRepository.create({
+  //           valor: createPagoTotalDto.valor,
+  //           cliente: { id: cliente },
+  //         });
+  //       } else {
+  //         pago = this.pagoParcialRepository.create({
+  //           valor: resultado,
+  //           cliente: { id: cliente },
+  //         });
+  
+  //         // Guardo en historial para que este un registro de los pagos
+  //         historial = this.historialRepository.create({
+  //           valor: createPagoTotalDto.valor,
+  //           cliente: { id: cliente },
+  //         });
+  //       }
+  
+  //       if (valorMas) {
+  //         await queryRunner.manager.delete(PagoMa, {
+  //           cliente: { id: cliente },
+  //         });
+  //       }
+  //     } else {
+  //       // Si el valor que paga es mayor a lo que debe se va por acá
+  //       console.log('valor total: ', valorTotal);
+  //       console.log('valor que paga: ', createPagoTotalDto.valor);
+  //       const resultado = createPagoTotalDto.valor - valorTotal;
+  
+  //       console.log('resultado: ', resultado);
+  //       // Verifico si existe un registro en la tabla de sobra plata para actualizarlo
+  //       const masdebe = await queryRunner.manager.findOne(PagoMa, {
+  //         where: { cliente: { id: cliente } },
+  //       });
+  
+  //       if (masdebe) {
+  //         pago = this.pagoMaRepository.create({
+  //           id: masdebe.id,
+  //           valor: resultado,
+  //         });
+  //       } else {
+  //         pago = this.pagoMaRepository.create({
+  //           valor: resultado,
+  //           cliente: { id: cliente },
+  //         });
+  //       }
+  
+  //       // Guardo en historial para que este un registro de los pagos
+  //       historial = this.historialRepository.create({
+  //         valor: createPagoTotalDto.valor,
+  //         cliente: { id: cliente },
+  //       });
+  
+  //       if (valorDebe) {
+  //         await queryRunner.manager.delete(PagoParcial, {
+  //           cliente: { id: cliente },
+  //         });
+  //       }
+  //     }
+  
+  //     await queryRunner.manager.save(pago);
+  //     await queryRunner.manager.save(historial);
+  
+  //     // Update the pago property for the Cliente entity
+  //     valorDiario.pago = true;
+  //     await queryRunner.manager.save(valorDiario);
+  
+  //     await queryRunner.commitTransaction();
+  
+  //     return {
+  //       message: 'Pago creado con éxito',
+  //     };
+  //   } catch (error) {
+  //     await queryRunner.rollbackTransaction();
+  //     console.log(error);
+  //     return {
+  //       message: 'Error en la creación del pago',
+  //       error,
+  //     };
+  //   } finally {
+  //     await queryRunner.release();
+  //   }
+  // }
+  
 
   async findAll() {
     try {

@@ -1,3 +1,4 @@
+import { Historial } from "src/historial/entities/historial.entity";
 import { PagoMa } from "src/pago-mas/entities/pago-ma.entity";
 import { PagoParcial } from "src/pago-parcial/entities/pago-parcial.entity";
 import { PagoTotal } from "src/pago-total/entities/pago-total.entity";
@@ -76,6 +77,9 @@ export class Cliente {
 
     @OneToMany(()=> PagoMa, (pagoMa)=> pagoMa.cliente)
     pagoMas: PagoMa[];
+
+    @OneToMany(()=> Historial, (historial)=> historial.cliente)
+    historial: Historial[];
 
 }
 
