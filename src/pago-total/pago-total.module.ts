@@ -7,10 +7,13 @@ import { Cliente } from 'src/cliente/entities/cliente.entity';
 import { PagoParcial } from 'src/pago-parcial/entities/pago-parcial.entity';
 import { PagoMa } from 'src/pago-mas/entities/pago-ma.entity';
 import { Historial } from 'src/historial/entities/historial.entity';
+import { UserModule } from 'src/user/user.module';
 
 @Module({
   controllers: [PagoTotalController],
   providers: [PagoTotalService],
-  imports: [TypeOrmModule.forFeature([PagoTotal, Cliente, PagoParcial, PagoMa, Historial])]
+  imports: [TypeOrmModule.forFeature([PagoTotal, Cliente, PagoParcial, PagoMa, Historial]),
+  UserModule
+]
 })
 export class PagoTotalModule {}

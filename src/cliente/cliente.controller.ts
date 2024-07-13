@@ -16,21 +16,25 @@ export class ClienteController {
   }
 
   @Get()
+  @Auth(ValidRoles.admin)
   async findAll() {
     return this.clienteService.findAll();
   }
 
   @Get(':id')
+  @Auth(ValidRoles.admin)
   findOne(@Param('id',ParseUUIDPipe) id: string) {
     return this.clienteService.findOne(id);
   }
 
   @Patch(':id')
+  @Auth(ValidRoles.admin)
   update(@Param('id', ParseUUIDPipe) id: string, @Body() updateClienteDto: UpdateClienteDto) {
     return this.clienteService.update(id, updateClienteDto);
   }
 
   @Delete(':id')
+  @Auth(ValidRoles.admin)
   remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.clienteService.remove(id);
   }
