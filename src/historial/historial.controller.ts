@@ -4,6 +4,7 @@ import { CreateHistorialDto } from './dto/create-historial.dto';
 import { UpdateHistorialDto } from './dto/update-historial.dto';
 import { Auth } from '../user/decorator/auth.decorator';
 import { ValidRoles } from 'src/user/interfaces';
+import { FiltroFechaDto } from './dto/filtroFecha.dto';
 
 @Controller('historial')
 export class HistorialController {
@@ -18,6 +19,14 @@ export class HistorialController {
   @Auth(ValidRoles.admin)
   async findAll() {
     return this.historialService.findAll();
+  }
+
+  //filtrar por fecha
+  @Post('fecha')
+  async findByDate(
+    @Body() filtroFechaDto:FiltroFechaDto
+  ) {
+    return this.historialService.findByDate(filtroFechaDto);
   }
 
   @Get(':id')
