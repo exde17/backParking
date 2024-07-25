@@ -7,6 +7,10 @@ import { PagoParcialModule } from './pago-parcial/pago-parcial.module';
 import { PagoTotalModule } from './pago-total/pago-total.module';
 import { PagoMasModule } from './pago-mas/pago-mas.module';
 import { HistorialModule } from './historial/historial.module';
+import { ParqueoModule } from './parqueo/parqueo.module';
+import { HistorialParqueoModule } from './historial-parqueo/historial-parqueo.module';
+import { AlquilerModule } from './alquiler/alquiler.module';
+import { HistorialAlquilerModule } from './historial-alquiler/historial-alquiler.module';
 
 @Module({
   imports: [
@@ -32,6 +36,10 @@ import { HistorialModule } from './historial/historial.module';
     PagoTotalModule,
     PagoMasModule,
     HistorialModule,
+    ParqueoModule,
+    HistorialParqueoModule,
+    AlquilerModule,
+    HistorialAlquilerModule,
   ],
 })
 export class AppModule {}

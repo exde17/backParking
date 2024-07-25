@@ -163,7 +163,7 @@ export class ClienteService {
         cliente: cliente,
         valor: cliente.valor,
       });
-      console.log('se ejecuto el cron')
+      //console.log('se ejecuto el cron')
       await this.pagoParcialRepository.save(pagoParcial);
     }
     // Actualiza todos los clientes para que no tengan el pago realizado
