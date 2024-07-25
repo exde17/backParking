@@ -16,7 +16,7 @@ export class UseRoleGuard implements CanActivate {
     
     const validRoles = this.reflector.get<string[]>(META_ROLES, context.getHandler());
     // const validRoles: string[] = this.reflector.get('roles', context.getHandler());
-    console.log({ validRoles })
+    // console.log({ validRoles })
     if(validRoles.length === 0) {
       return true;
     }
@@ -29,7 +29,7 @@ export class UseRoleGuard implements CanActivate {
     }
 
     // const hasRole = () => user.role.some((role) => validRoles.includes(role));
-    console.log({ user: user.role })
+    // console.log({ user: user.role })
     for(const role of user.role) {
       if(validRoles.includes(role))
         return true;

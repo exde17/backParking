@@ -49,7 +49,7 @@ export class PagoTotalService {
       const valorMas = await queryRunner.manager.findOne(PagoMa, {
         where: {cliente:{id: cliente}}
       });
-      console.log(valorDebe)
+      // console.log(valorDebe)
 
       //verifico si ya pago y debe pero quiere pagar lo que debe el mismo dia
       if(valorDebe && valorDiario?.pago){
