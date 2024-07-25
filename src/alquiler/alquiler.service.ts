@@ -1,26 +1,92 @@
 import { Injectable } from '@nestjs/common';
 import { CreateAlquilerDto } from './dto/create-alquiler.dto';
 import { UpdateAlquilerDto } from './dto/update-alquiler.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Alquiler } from './entities/alquiler.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class AlquilerService {
-  create(createAlquilerDto: CreateAlquilerDto) {
-    return 'This action adds a new alquiler';
+  @InjectRepository(Alquiler)
+  private readonly alquilerRepository: Repository<Alquiler>;
+
+  async create(createAlquilerDto: CreateAlquilerDto) {
+    try {
+      const alquiler = this.alquilerRepository.create(createAlquilerDto);
+      await this.alquilerRepository.save(alquiler);
+
+      return {
+        message: 'Alquiler creado con exito'
+      }
+    } catch (error) {
+      return {
+        message: 'Error al crear alquiler',
+        error: error
+      }
+      
+    }
   }
 
-  findAll() {
-    return `This action returns all alquiler`;
+  async findAll() {
+    try {
+      return await this.alquilerRepository.find();
+      
+    } catch (error) {
+      return {
+        message: 'Error al obtener alquileres',
+        error: error
+      }
+      
+    }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} alquiler`;
+  async findOne(id: string) {
+    try {
+      const res = await this.alquilerRepository.findOne({
+        where: {
+          id: id
+        }
+      });
+
+      if(res){
+        return res;
+      }else{
+        throw new Error('No se encontro alquiler');
+      }
+      
+    } catch (error) {
+      throw error
+      
+    }
   }
 
-  update(id: number, updateAlquilerDto: UpdateAlquilerDto) {
-    return `This action updates a #${id} alquiler`;
+  async update(id: string, updateAlquilerDto: UpdateAlquilerDto) {
+   
+    try {
+      await this.alquilerRepository.update(id, updateAlquilerDto);
+      return {
+        message: 'Alquiler actualizado con exito'
+      }
+    } catch (error) {
+      return {
+        message: 'Error al actualizar alquiler',
+        error: error
+      }
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} alquiler`;
+  async remove(id: string) {
+    
+    try {
+      await this.alquilerRepository.delete(id);
+      return {
+        message: 'Alquiler eliminado con exito'
+      }
+    } catch (error) {
+      return {
+        message: 'Error al eliminar alquiler',
+        error: error
+      }
+    }
   }
 }

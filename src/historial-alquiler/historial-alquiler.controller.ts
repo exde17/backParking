@@ -8,7 +8,7 @@ export class HistorialAlquilerController {
   constructor(private readonly historialAlquilerService: HistorialAlquilerService) {}
 
   @Post()
-  create(@Body() createHistorialAlquilerDto: CreateHistorialAlquilerDto) {
+  async create(@Body() createHistorialAlquilerDto: CreateHistorialAlquilerDto) {
     return this.historialAlquilerService.create(createHistorialAlquilerDto);
   }
 

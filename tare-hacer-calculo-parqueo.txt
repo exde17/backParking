@@ -1,0 +1,40 @@
+Para calcular el tiempo de parqueo y el costo basado en el tipo de vehículo (moto o carro), primero necesitas calcular la diferencia entre la hora de salida y la hora de entrada, y luego redondear hacia arriba si el resultado es un número decimal para asegurarte de que se cobre la hora completa. Aquí te dejo un ejemplo de cómo podrías hacerlo en TypeScript, asumiendo que tienes una fecha de entrada y una fecha de salida como Date:
+
+Calcular la diferencia en horas entre la fecha/hora de entrada y la fecha/hora de salida.
+Redondear hacia arriba si el resultado es un número decimal.
+Calcular el costo basado en el tipo de vehículo.
+
+import { differenceInMinutes } from 'date-fns';
+
+class Parqueadero {
+    calcularCosto(tipo: string, entrada: Date, salida: Date): number {
+        // Calcula la diferencia en minutos
+        const minutos = differenceInMinutes(salida, entrada);
+        // Convierte minutos a horas y redondea hacia arriba
+        const horas = Math.ceil(minutos / 60);
+        
+        // Define el costo por hora basado en el tipo de vehículo
+        let costoPorHora: number;
+        if (tipo === 'moto') {
+            costoPorHora = 2000;
+        } else if (tipo === 'carro') {
+            costoPorHora = 5000;
+        } else {
+            throw new Error('Tipo de vehículo no soportado');
+        }
+        
+        // Calcula el costo total
+        return horas * costoPorHora;
+    }
+}
+
+// Ejemplo de uso
+const parqueadero = new Parqueadero();
+const entrada = new Date('2024-07-23 23:54:43.398');
+const salida = new Date('2024-07-24 02:54:43.398');
+const costo = parqueadero.calcularCosto('moto', entrada, salida);
+console.log(`El costo del parqueo es: ${costo}`);
+
+Para este código, necesitarás tener instalado date-fns para manejar la diferencia de tiempo de manera más sencilla. Puedes instalarlo con npm:
+
+npm install date-fns

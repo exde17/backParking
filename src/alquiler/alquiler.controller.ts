@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseUUIDPipe } from '@nestjs/common';
 import { AlquilerService } from './alquiler.service';
 import { CreateAlquilerDto } from './dto/create-alquiler.dto';
 import { UpdateAlquilerDto } from './dto/update-alquiler.dto';
@@ -8,7 +8,7 @@ export class AlquilerController {
   constructor(private readonly alquilerService: AlquilerService) {}
 
   @Post()
-  create(@Body() createAlquilerDto: CreateAlquilerDto) {
+  async create(@Body() createAlquilerDto: CreateAlquilerDto) {
     return this.alquilerService.create(createAlquilerDto);
   }
 
@@ -18,17 +18,17 @@ export class AlquilerController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.alquilerService.findOne(+id);
+  findOne(@Param('id', ParseUUIDPipe) id: string) {
+    return this.alquilerService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAlquilerDto: UpdateAlquilerDto) {
-    return this.alquilerService.update(+id, updateAlquilerDto);
+  update(@Param('id',ParseUUIDPipe) id: string, @Body() updateAlquilerDto: UpdateAlquilerDto) {
+    return this.alquilerService.update(id, updateAlquilerDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.alquilerService.remove(+id);
+  remove(@Param('id',ParseUUIDPipe) id: string) {
+    return this.alquilerService.remove(id);
   }
 }
