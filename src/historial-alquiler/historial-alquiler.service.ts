@@ -50,14 +50,14 @@ export class HistorialAlquilerService {
   //   }
   // }
 
-  async create(createHistorialAlquilerDto: CreateHistorialAlquilerDto) {
+  async create(id: string) {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
   
     try {
       const alquiler = await queryRunner.manager.findOne(Alquiler, {
-        where: { id: createHistorialAlquilerDto.idAlquiler },
+        where: { id },
       });
   
       if (!alquiler) {
@@ -68,10 +68,14 @@ export class HistorialAlquilerService {
         nombreCliente: alquiler.nombreCliente,
         tipo: alquiler.tipo,
         precio: alquiler.precio,
-        fechaSalida: alquiler.salidasAt,
+        fechaSalida: alquiler.entradadAt,
       });
   
       await queryRunner.manager.save(history);
+
+      //borro el alquiler
+      await queryRunner.manager.delete(Alquiler, id);
+
       await queryRunner.commitTransaction();
   
       return { message: 'Historial de alquiler creado con éxito' };
@@ -83,8 +87,16 @@ export class HistorialAlquilerService {
     }
   }
 
-  findAll() {
-    return `This action returns all historialAlquiler`;
+  async findAll() {
+    try {
+      return await this.historyRepository.find();
+    } catch (error) {
+      return {
+        message: 'Error al obtener historial de alquiler',
+        error: error
+      }
+      
+    }
   }
 
   findOne(id: number) {

@@ -23,6 +23,7 @@ export class HistorialController {
 
   //filtrar por fecha
   @Post('fecha')
+  @Auth(ValidRoles.admin)
   async findByDate(
     @Body() filtroFechaDto:FiltroFechaDto
   ) {
