@@ -17,32 +17,6 @@ export class HistorialService {
     return 'This action adds a new historial';
   }
 
-  // async findAll() {
-  //   try {
-  //     const historiales = await this.historialRepository.find({
-  //       relations: {
-  //         cliente: true,
-  //       },
-  //       order: {
-  //         createdAt: 'DESC'
-  //       }
-  //     });
-  
-  //     // Mapear los resultados para extraer solo los datos necesarios
-  //     return historiales.map(historial => ({
-  //       fechaCreacion: historial.createdAt,
-  //       valorPago: historial.valor,
-  //       nombreCliente: historial.cliente.nombre
-  //     }));
-      
-  //   } catch (error) {
-  //     return {
-  //       message: 'Error en el servidor',
-  //       error: error
-  //     };
-  //   }
-  // }
-
   async findAll() {
     try {
       const historiales = await this.historialRepository.find({
@@ -71,6 +45,8 @@ export class HistorialService {
 
   //filtrar por fecha
   async findByDate(filtroFechaDto:FiltroFechaDto) {
+    let suma = 0
+    let x = []
     try {
       const {fecha, tipoFiltro} = filtroFechaDto;
       
@@ -107,11 +83,20 @@ export class HistorialService {
       });
   
       // Mapear los resultados para formatear la fecha y extraer solo los datos necesarios
-      return historiales.map(historial => ({
+      for(let i=0; i< historiales.length; i++){
+        suma += (+ historiales[i].valor)
+      }
+
+      const res= historiales.map(historial => ({
         fechaCreacion: format(new Date(historial.createdAt), 'dd/MM/yyyy HH:mm'),
         valorPago: historial.valor,
         nombreCliente: historial.cliente.nombre,
       }));
+
+      return{
+        data: res,
+        total: suma.toLocaleString('es-ES')
+      }
   
     } catch (error) {
       return {
