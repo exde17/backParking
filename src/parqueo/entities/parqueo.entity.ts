@@ -17,8 +17,14 @@ export class Parqueo {
     placa: string;
 
     //fecha de creacion
-    @Column('timestamp',{
-        default: () => 'CURRENT_TIMESTAMP'
+    // @Column('timestamp',{
+    //     default: () => 'CURRENT_TIMESTAMP'
+    // })
+    // entradadAt: Date;
+
+    @Column('timestamp', {
+        nullable: true,
+        default: () => "CURRENT_TIMESTAMP AT TIME ZONE 'America/Bogota'"
     })
     entradadAt: Date;
 

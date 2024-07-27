@@ -11,15 +11,27 @@ export class Historial {
     })
     valor: number;
 
-    @Column('timestamp',{
+    // @Column('timestamp',{
+    //     nullable: true,
+    //     default: () => 'CURRENT_TIMESTAMP'
+    // })
+    // createdAt: Date;
+
+    // @Column('timestamp',{
+    //     nullable: true,
+    //     default: () => 'CURRENT_TIMESTAMP'
+    // })
+    // updatedAt: Date;
+
+    @Column('timestamp', {
         nullable: true,
-        default: () => 'CURRENT_TIMESTAMP'
+        default: () => "CURRENT_TIMESTAMP AT TIME ZONE 'America/Bogota'"
     })
     createdAt: Date;
-
-    @Column('timestamp',{
+    
+    @Column('timestamp', {
         nullable: true,
-        default: () => 'CURRENT_TIMESTAMP'
+        default: () => "CURRENT_TIMESTAMP AT TIME ZONE 'America/Bogota'"
     })
     updatedAt: Date;
 
