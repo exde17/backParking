@@ -9,6 +9,13 @@ import { ValidRoles } from 'src/user/interfaces';
 export class PagoTotalController {
   constructor(private readonly pagoTotalService: PagoTotalService) {}
 
+  //suma de pagos totales
+  @Get('sumaPagos')
+  @Auth(ValidRoles.admin)
+  async sumaTotal(){
+    return this.pagoTotalService.sumaTotal();
+  }
+  
   @Post()
   @Auth(ValidRoles.admin)
   async create(@Body() createPagoTotalDto: CreatePagoTotalDto) {
