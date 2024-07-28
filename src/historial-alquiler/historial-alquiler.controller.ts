@@ -15,6 +15,13 @@ export class HistorialAlquilerController {
     return this.historialAlquilerService.create(id);
   }
 
+  //suma de alquileres pagos del dia
+  @Get('sumaAlquileres')
+  //@Auth(ValidRoles.admin)
+  async sumaAlquileres() {
+    return this.historialAlquilerService.sumaAlquileres();
+  }
+
   @Get()
   @Auth(ValidRoles.admin)
   async findAll() {

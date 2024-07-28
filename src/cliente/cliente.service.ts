@@ -9,6 +9,7 @@ import { PagoParcial } from 'src/pago-parcial/entities/pago-parcial.entity';
 import { PagoTotal } from 'src/pago-total/entities/pago-total.entity';
 import { PagoMa } from 'src/pago-mas/entities/pago-ma.entity';
 import { Historial } from 'src/historial/entities/historial.entity';
+import { Alquiler } from 'src/alquiler/entities/alquiler.entity';
 
 @Injectable()
 export class ClienteService {
@@ -23,6 +24,8 @@ export class ClienteService {
     private readonly pagoMasRepository: Repository<PagoMa>,
     @InjectRepository(Historial)
     private readonly historialRepository: Repository<Historial>,
+    @InjectRepository(Alquiler)
+    private readonly alquilerRepository: Repository<Alquiler>,
   ) { }
   async create(createClienteDto: CreateClienteDto) {
     try {
@@ -217,5 +220,27 @@ export class ClienteService {
         await this.historialRepository.save(historial);
       }
     }
+
+    //si el pending de algun registro de alquiler es true el precio se aumenta al doble
+    const alquiler = await this.alquilerRepository.find({
+      where: { pending: true }
+    });
+
+    for (const item of alquiler) {
+      item.precio = (+ item.precio) + 5000;
+      await this.alquilerRepository.save(item);
+    }
+
+    //pongo todos los isActive que esten en false en true en la tabla alquiler
+
+    const alquileres = await this.alquilerRepository.find({
+      where: { isActive: false }
+    });
+
+    for (const item of alquileres) {
+      item.isActive = true;
+      await this.alquilerRepository.save(item);
+    }
+
   }
 }

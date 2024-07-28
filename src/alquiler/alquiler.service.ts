@@ -29,7 +29,11 @@ export class AlquilerService {
 
   async findAll() {
     try {
-      return await this.alquilerRepository.find();
+      return await this.alquilerRepository.find({
+        where: {
+          isActive: true
+        }
+      });
       
     } catch (error) {
       return {
@@ -85,6 +89,27 @@ export class AlquilerService {
     } catch (error) {
       return {
         message: 'Error al eliminar alquiler',
+        error: error
+      }
+    }
+  }
+
+  //actualizar el estado de pendiente
+  async updatePendiente(id: string) {
+    try {
+      const res = await this.alquilerRepository.findOne({
+        where: {
+          id: id
+        }
+      });
+       res.pending = !res.pending;
+      await this.alquilerRepository.save(res);
+      return {
+        message: 'Alquiler actualizado con exito'
+      }
+    } catch (error) {
+      return {
+        message: 'Error al actualizar alquiler',
         error: error
       }
     }

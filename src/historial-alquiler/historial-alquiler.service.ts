@@ -74,7 +74,15 @@ export class HistorialAlquilerService {
       await queryRunner.manager.save(history);
 
       //borro el alquiler
-      await queryRunner.manager.delete(Alquiler, id);
+      // await queryRunner.manager.delete(Alquiler, id);
+
+      //actualizar el estado del alquiler
+      alquiler.isActive = false;
+      //actualizo el estado de pendiente
+      alquiler.pending = false;
+      //actualizo el precio por si las moscas
+      alquiler.precio = 5000;
+      await queryRunner.manager.save(alquiler);
 
       await queryRunner.commitTransaction();
   
@@ -109,5 +117,29 @@ export class HistorialAlquilerService {
 
   remove(id: number) {
     return `This action removes a #${id} historialAlquiler`;
+  }
+
+  //suma de alquileres pagos del dia
+  async sumaAlquileres() {
+    let suma = 0;
+    try {
+      const pagosTotales = await this.historyRepository.find();
+      const fechaActual = new Date().toISOString().split('T')[0]; // Obtener la fecha actual en formato YYYY-MM-DD
+  
+      const pagosDelDia = pagosTotales.filter((item) => {
+        const fechaPago = new Date(item.fechaEntrega).toISOString().split('T')[0];
+        return fechaPago === fechaActual;
+      });
+  
+      pagosDelDia.forEach((item) => {
+        suma += +item.precio;
+      });
+  
+      return {
+        'totalPagos': suma.toLocaleString('es-ES')
+      };
+    } catch (error) {
+      return error;
+    }
   }
 }

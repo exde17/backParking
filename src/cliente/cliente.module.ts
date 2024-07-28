@@ -11,10 +11,11 @@ import { Historial } from 'src/historial/entities/historial.entity';
 import { Auth } from 'src/user/decorator';
 import { AuthGuard } from '@nestjs/passport';
 import { UserModule } from 'src/user/user.module';
+import { Alquiler } from 'src/alquiler/entities/alquiler.entity';
 
 @Module({
   controllers: [ClienteController],
   providers: [ClienteService],
-  imports: [TypeOrmModule.forFeature([Cliente, PagoParcial, PagoMa, PagoTotal,Historial]),ScheduleModule.forRoot(),UserModule]
+  imports: [TypeOrmModule.forFeature([Cliente, PagoParcial, PagoMa, PagoTotal,Historial, Alquiler]),ScheduleModule.forRoot(),UserModule]
 })
 export class ClienteModule {}

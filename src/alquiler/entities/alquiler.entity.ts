@@ -39,4 +39,16 @@ export class Alquiler {
             nullable: true
         })
         salidasAt: Date;
+
+        @Column('bool',{
+            nullable: false,
+            default: true
+        })
+        isActive: boolean;
+
+        @Column('bool',{
+            nullable: false,
+            default: false
+        })
+        pending: boolean;
 }
