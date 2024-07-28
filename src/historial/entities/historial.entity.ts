@@ -24,9 +24,8 @@ export class Historial {
     // updatedAt: Date;
 
     @Column('timestamp', {
-        nullable: true,
-        default: () => "CURRENT_TIMESTAMP AT TIME ZONE 'America/Bogota'"
-    })
+        default: () => "timezone('America/Bogota', now())",
+      })
     createdAt: Date;
     
     @Column('timestamp', {
