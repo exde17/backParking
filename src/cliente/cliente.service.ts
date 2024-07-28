@@ -173,7 +173,11 @@ export class ClienteService {
   
       console.log("Datos finales:", data);
   
-      return data;
+      // Ordenar nuevamente los datos finales para asegurar que están ordenados
+      const sortedData = data.sort((a, b) => a.nombre.localeCompare(b.nombre));
+      console.log("Datos finales ordenados:", sortedData);
+  
+      return sortedData;
     } catch (error) {
       console.error("Error al obtener los clientes:", error);
       return {
