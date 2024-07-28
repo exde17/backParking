@@ -118,11 +118,16 @@ export class ClienteService {
 
   async findAll() {
     try {
+      console.log("Obteniendo clientes...");
+  
+      // Obtener los clientes ordenados por nombre
       const clientes = await this.clienteRepository.find({
         order: {
-          nombre: 'ASC', // Esto asegura que los clientes se ordenen por nombre de forma ascendente
+          nombre: 'ASC', // Asegurar la ordenación por nombre ascendente
         },
       });
+  
+      console.log("Clientes obtenidos:", clientes);
   
       const data = await Promise.all(clientes.map(async (item) => {
         let opera = 0;
@@ -152,7 +157,7 @@ export class ClienteService {
           opera = ((+(item?.valor ?? 0)) + (+(debe?.valor ?? 0))) - (+(sobra?.valor ?? 0));
         }
   
-        return {
+        const inf = {
           id: item.id,
           nombre: item.nombre,
           valor: opera,
@@ -160,16 +165,24 @@ export class ClienteService {
           pago: item.pago,
           isActive: item.isActive,
         };
+  
+        console.log("Información procesada para cliente:", inf);
+  
+        return inf;
       }));
+  
+      console.log("Datos finales:", data);
   
       return data;
     } catch (error) {
+      console.error("Error al obtener los clientes:", error);
       return {
         message: 'Error al obtener los clientes',
         error,
       };
     }
   }
+  
   
 
   async findOne(id: string) {
