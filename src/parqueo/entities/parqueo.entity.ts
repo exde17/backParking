@@ -23,9 +23,8 @@ export class Parqueo {
     // entradadAt: Date;
 
     @Column('timestamp', {
-        nullable: true,
-        default: () => "CURRENT_TIMESTAMP AT TIME ZONE 'America/Bogota'"
-    })
+        default: () => "timezone('America/Bogota', now())",
+      })
     entradadAt: Date;
 
     //fecha de salida

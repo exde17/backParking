@@ -57,10 +57,10 @@ export class Cliente {
     })
     novedad: boolean 
 
-    @Column('timestamp',{
+    @Column('timestamp', {
         nullable: true,
-        default: () => 'CURRENT_TIMESTAMP'
-    })
+        default: () => "timezone('America/Bogota', now())",
+      })
     createdAt: Date;
 
     @Column('timestamp',{

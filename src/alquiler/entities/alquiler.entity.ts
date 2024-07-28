@@ -22,11 +22,6 @@ export class Alquiler {
         })
         precio: number;
     
-        //fecha de creacion
-        // @Column('timestamp',{
-        //     default: () => 'CURRENT_TIMESTAMP'
-        // })
-        // entradadAt: Date;
 
         @Column('timestamp', {
             default: () => "timezone('America/Bogota', now())",
