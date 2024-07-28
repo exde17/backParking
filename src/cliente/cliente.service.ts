@@ -118,7 +118,7 @@ export class ClienteService {
 
   async findAll() {
     try {
-      console.log("Obteniendo clientes...");
+      //console.log("Obteniendo clientes...");
   
       // Obtener los clientes ordenados por nombre
       const clientes = await this.clienteRepository.find({
@@ -127,7 +127,7 @@ export class ClienteService {
         },
       });
   
-      console.log("Clientes obtenidos:", clientes);
+      //console.log("Clientes obtenidos:", clientes);
   
       const data = await Promise.all(clientes.map(async (item) => {
         let opera = 0;
@@ -166,20 +166,20 @@ export class ClienteService {
           isActive: item.isActive,
         };
   
-        console.log("Información procesada para cliente:", inf);
+        //console.log("Información procesada para cliente:", inf);
   
         return inf;
       }));
   
-      console.log("Datos finales:", data);
+      //console.log("Datos finales:", data);
   
       // Ordenar nuevamente los datos finales para asegurar que están ordenados
       const sortedData = data.sort((a, b) => a.nombre.localeCompare(b.nombre));
-      console.log("Datos finales ordenados:", sortedData);
+      //console.log("Datos finales ordenados:", sortedData);
   
       return sortedData;
     } catch (error) {
-      console.error("Error al obtener los clientes:", error);
+      //console.error("Error al obtener los clientes:", error);
       return {
         message: 'Error al obtener los clientes',
         error,
