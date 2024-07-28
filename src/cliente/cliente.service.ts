@@ -49,7 +49,12 @@ export class ClienteService {
     try {
 
       // let data =[]
-      const clientes = await this.clienteRepository.find()
+      const clientes = await this.clienteRepository.find({
+        //organizo los clientes por nombre de forma ascendente
+        order: {
+          nombre: 'ASC'
+        }
+      })
 
       const data = await Promise.all(clientes.map(async (item) => {
         let inf = {}

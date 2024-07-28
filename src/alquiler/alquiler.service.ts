@@ -32,6 +32,9 @@ export class AlquilerService {
       return await this.alquilerRepository.find({
         where: {
           isActive: true
+        },
+        order: {
+          nombreCliente: 'ASC'
         }
       });
       
