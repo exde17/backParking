@@ -4,6 +4,7 @@ import { CreateHistorialAlquilerDto } from './dto/create-historial-alquiler.dto'
 import { UpdateHistorialAlquilerDto } from './dto/update-historial-alquiler.dto';
 import { Auth } from 'src/user/decorator';
 import { ValidRoles } from 'src/user/interfaces';
+import { FiltroFechaDto } from 'src/historial/dto/filtroFecha.dto';
 
 @Controller('historial-alquiler')
 export class HistorialAlquilerController {
@@ -13,6 +14,22 @@ export class HistorialAlquilerController {
   @Auth(ValidRoles.admin)
   async create(@Param('id',ParseUUIDPipe) id: string) {
     return this.historialAlquilerService.create(id);
+  }
+
+  //suma de alquileres pagos del dia
+  @Get('sumaAlquileres')
+  @Auth(ValidRoles.admin)
+  async sumaAlquileres() {
+    return this.historialAlquilerService.sumaAlquileres();
+  }
+
+  //filtrar por fecha
+  @Post('fecha')
+  @Auth(ValidRoles.admin)
+  async findByDate(
+    @Body() filtroFechaDto:FiltroFechaDto
+  ) {
+    return this.historialAlquilerService.findByDate(filtroFechaDto);
   }
 
   @Get()

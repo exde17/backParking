@@ -11,15 +11,26 @@ export class PagoMa {
     })
     valor: number;
 
-    @Column('timestamp',{
-        nullable: true,
-        default: () => 'CURRENT_TIMESTAMP'
-    })
-    createdAt: Date;
+    // @Column('timestamp',{
+    //     nullable: true,
+    //     default: () => 'CURRENT_TIMESTAMP'
+    // })
+    // createdAt: Date;
 
-    @Column('timestamp',{
+    // @Column('timestamp',{
+    //     nullable: true,
+    //     default: () => 'CURRENT_TIMESTAMP'
+    // })
+    // updatedAt: Date;
+
+    @Column('timestamp', {
+        default: () => "timezone('America/Bogota', now())",
+      })
+    createdAt: Date;
+    
+    @Column('timestamp', {
         nullable: true,
-        default: () => 'CURRENT_TIMESTAMP'
+        default: () => "CURRENT_TIMESTAMP AT TIME ZONE 'America/Bogota'"
     })
     updatedAt: Date;
 

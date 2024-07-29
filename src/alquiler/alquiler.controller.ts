@@ -21,6 +21,13 @@ export class AlquilerController {
     return this.alquilerService.findAll();
   }
 
+  //actualizar el estado de pendiente
+  @Patch('pendiente/:id')
+  @Auth(ValidRoles.admin)
+  updatePendiente(@Param('id',ParseUUIDPipe) id: string) {
+    return this.alquilerService.updatePendiente(id);
+  }
+
   @Get(':id')
   @Auth(ValidRoles.admin)
   findOne(@Param('id', ParseUUIDPipe) id: string) {

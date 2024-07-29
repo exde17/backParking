@@ -22,10 +22,10 @@ export class Alquiler {
         })
         precio: number;
     
-        //fecha de creacion
-        @Column('timestamp',{
-            default: () => 'CURRENT_TIMESTAMP'
-        })
+
+        @Column('timestamp', {
+            default: () => "timezone('America/Bogota', now())",
+          })
         entradadAt: Date;
     
         //fecha de salida
@@ -33,4 +33,16 @@ export class Alquiler {
             nullable: true
         })
         salidasAt: Date;
+
+        @Column('bool',{
+            nullable: false,
+            default: true
+        })
+        isActive: boolean;
+
+        @Column('bool',{
+            nullable: false,
+            default: false
+        })
+        pending: boolean;
 }

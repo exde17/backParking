@@ -21,11 +21,18 @@ export class HistorialAlquiler {
     })
     precio: number;
 
-    @Column('timestamp',{
-        default: () => 'CURRENT_TIMESTAMP',
-        name: 'fecha-entrega'
-    })
-    fechaEntrega: Date;
+    // @Column('timestamp', {
+    //     //nullable: true,
+    //     default: () => "CURRENT_TIMESTAMP AT TIME ZONE 'America/Bogota'",
+    //     name: 'fecha-entrega'
+    // })
+    // fechaEntrega: Date;
+    @Column('timestamp', {
+        default: () => "timezone('America/Bogota', now())",
+        name: 'fecha_entrega',
+      })
+      fechaEntrega: Date;
+    
 
     @Column('timestamp',{
         nullable: false,

@@ -3,9 +3,11 @@ import { CreateHistorialAlquilerDto } from './dto/create-historial-alquiler.dto'
 import { UpdateHistorialAlquilerDto } from './dto/update-historial-alquiler.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { HistorialAlquiler } from './entities/historial-alquiler.entity';
-import { Repository } from 'typeorm';
+import { Between, Repository } from 'typeorm';
 import { Alquiler } from 'src/alquiler/entities/alquiler.entity';
 import { DataSource } from 'typeorm';
+import { FiltroFechaDto } from 'src/historial/dto/filtroFecha.dto';
+import { format } from 'date-fns';
 
 @Injectable()
 export class HistorialAlquilerService {
@@ -74,7 +76,15 @@ export class HistorialAlquilerService {
       await queryRunner.manager.save(history);
 
       //borro el alquiler
-      await queryRunner.manager.delete(Alquiler, id);
+      // await queryRunner.manager.delete(Alquiler, id);
+
+      //actualizar el estado del alquiler
+      alquiler.isActive = false;
+      //actualizo el estado de pendiente
+      alquiler.pending = false;
+      //actualizo el precio por si las moscas
+      alquiler.precio = 5000;
+      await queryRunner.manager.save(alquiler);
 
       await queryRunner.commitTransaction();
   
@@ -109,5 +119,89 @@ export class HistorialAlquilerService {
 
   remove(id: number) {
     return `This action removes a #${id} historialAlquiler`;
+  }
+
+  //suma de alquileres pagos del dia
+  async sumaAlquileres() {
+    let suma = 0;
+    try {
+      const pagosTotales = await this.historyRepository.find();
+      const fechaActual = new Date().toISOString().split('T')[0]; // Obtener la fecha actual en formato YYYY-MM-DD
+  
+      const pagosDelDia = pagosTotales.filter((item) => {
+        const fechaPago = new Date(item.fechaEntrega).toISOString().split('T')[0];
+        return fechaPago === fechaActual;
+      });
+  
+      pagosDelDia.forEach((item) => {
+        suma += +item.precio;
+      });
+  
+      return {
+        'totalPagos': suma.toLocaleString('es-ES')
+      };
+    } catch (error) {
+      return error;
+    }
+  }
+
+  //filtrar por fecha
+  async findByDate(filtroFechaDto:FiltroFechaDto) {
+    let suma = 0
+    let x = []
+    try {
+      const {fecha, tipoFiltro} = filtroFechaDto;
+      
+      let startDate: Date;
+      let endDate: Date;
+  
+      switch (tipoFiltro) {
+        case 'dia':
+          startDate = new Date(fecha.setHours(0, 0, 0, 0));
+          endDate = new Date(fecha.setHours(23, 59, 59, 999));
+          break;
+        case 'mes':
+          startDate = new Date(fecha.getFullYear(), fecha.getMonth(), 1, 0, 0, 0, 0);
+          endDate = new Date(fecha.getFullYear(), fecha.getMonth() + 1, 0, 23, 59, 59, 999);
+          break;
+        case 'anio':
+          startDate = new Date(fecha.getFullYear(), 0, 1, 0, 0, 0, 0);
+          endDate = new Date(fecha.getFullYear(), 11, 31, 23, 59, 59, 999);
+          break;
+        default:
+          throw new Error('Tipo de filtro no válido');
+      }
+  
+      const historiales = await this.historyRepository.find({
+        where: {
+          fechaEntrega: Between(startDate, endDate),
+        },
+        order: {
+          fechaEntrega: 'DESC',
+        },
+      });
+  
+      // Mapear los resultados para formatear la fecha y extraer solo los datos necesarios
+      for(let i=0; i< historiales.length; i++){
+        suma += (+ historiales[i].precio)
+      }
+
+      const res= historiales.map(historial => ({
+        fechaCreacion: format(new Date(historial.fechaEntrega), 'dd/MM/yyyy HH:mm'),
+        valorPago: historial.precio,
+        nombreCliente: historial.nombreCliente,
+      }));
+
+      return{
+        data: res,
+        total: suma.toLocaleString('es-ES')
+      }
+  
+    } catch (error) {
+      return {
+        message: 'Error en el servidor',
+        error: error,
+      };
+    }
   }
 }

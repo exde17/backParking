@@ -232,6 +232,30 @@ export class PagoTotalService {
     }
   }
 
+  // suma de pagos totales del día actual
+async sumaTotal() {
+  let suma = 0;
+  try {
+    const pagosTotales = await this.historialRepository.find();
+    const fechaActual = new Date().toISOString().split('T')[0]; // Obtener la fecha actual en formato YYYY-MM-DD
+
+    const pagosDelDia = pagosTotales.filter((item) => {
+      const fechaPago = new Date(item.createdAt).toISOString().split('T')[0];
+      return fechaPago === fechaActual;
+    });
+
+    pagosDelDia.forEach((item) => {
+      suma += +item.valor;
+    });
+
+    return {
+      'totalPagos': suma.toLocaleString('es-ES')
+    };
+  } catch (error) {
+    return error;
+  }
+}
+
   async findOne(id: string) {
     try {
       return await this.pagoTotalRepository.findOne({
