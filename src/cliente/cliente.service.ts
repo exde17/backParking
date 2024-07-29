@@ -168,7 +168,7 @@ export class ClienteService {
         where: { cliente: { id: cliente.id } },
       });
       if (pagoParcialExistente) {
-        pagoParcialExistente.valor += cliente.valor;
+        pagoParcialExistente.valor += (+ cliente.valor);
         await this.pagoParcialRepository.save(pagoParcialExistente);
         continue;
       }
