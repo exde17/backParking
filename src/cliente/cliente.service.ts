@@ -159,13 +159,25 @@ export class ClienteService {
     // Verifico si hay clientes que no han pagado al final del día y guardo en pago parcial el valor de la deuda que es el valor del pago del cliente
     const clientes = await this.clienteRepository.find({ where: { pago: false } });
     for (const cliente of clientes) {
-      const pagoParcial = this.pagoParcialRepository.create({
-        cliente: cliente,
-        valor: cliente.valor,
+      //verifico si ya existe un registro de este cliente en pago parcial y si existe lo actualizo con la suma del valor que ya tiene mas el valor que debe
+      const pagoParcialExistente = await this.pagoParcialRepository.findOne({
+        where: { cliente: { id: cliente.id } },
       });
-      //console.log('se ejecuto el cron')
-      await this.pagoParcialRepository.save(pagoParcial);
-    }
+      if (pagoParcialExistente) {
+        pagoParcialExistente.valor += cliente.valor;
+        await this.pagoParcialRepository.save(pagoParcialExistente);
+        continue;
+      }
+      else{
+        const pagoParcial = this.pagoParcialRepository.create({
+          cliente: cliente,
+          valor: cliente.valor,
+        });
+        //console.log('se ejecuto el cron')
+        await this.pagoParcialRepository.save(pagoParcial);
+      }
+      }
+      
     // Actualiza todos los clientes para que no tengan el pago realizado
     await this.clienteRepository.update({}, { pago: false });
 
