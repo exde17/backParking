@@ -234,10 +234,13 @@ export class PagoTotalService {
 
   // suma de pagos totales del día actual
 async sumaTotal() {
+  const moment = require('moment-timezone');
   let suma = 0;
   try {
     const pagosTotales = await this.historialRepository.find();
-    const fechaActual = new Date().toISOString().split('T')[0]; // Obtener la fecha actual en formato YYYY-MM-DD
+    // const fechaActual = new Date().toISOString().split('T')[0]; // Obtener la fecha actual en formato YYYY-MM-DD
+    // Obtener la fecha y hora actual en la zona horaria de Colombia
+const fechaActual = moment.tz('America/Bogota').format('YYYY-MM-DD HH:mm:ss');
 
     const pagosDelDia = pagosTotales.filter((item) => {
       const fechaPago = new Date(item.createdAt).toISOString().split('T')[0];
