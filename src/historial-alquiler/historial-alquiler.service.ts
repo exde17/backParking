@@ -8,7 +8,7 @@ import { Alquiler } from 'src/alquiler/entities/alquiler.entity';
 import { DataSource } from 'typeorm';
 import { FiltroFechaDto } from 'src/historial/dto/filtroFecha.dto';
 import { format } from 'date-fns';
-import moment from 'moment-timezone';
+// import moment from 'moment-timezone';
 
 @Injectable()
 export class HistorialAlquilerService {
@@ -128,19 +128,19 @@ export class HistorialAlquilerService {
     let suma = 0;
     try {
       const pagosTotales = await this.historyRepository.find();
-      // const fechaActual = new Date().toISOString().split('T')[0]; // Obtener la fecha actual en formato YYYY-MM-DD
+      const fechaActual = new Date().toISOString().split('T')[0]; // Obtener la fecha actual en formato YYYY-MM-DD
       // Obtener la fecha y hora actual en la zona horaria de Colombia
-      const fechaActual = moment.tz('America/Bogota').format('YYYY-MM-DD HH:mm:ss');
+      // const fechaActual = moment.tz('America/Bogota').format('YYYY-MM-DD HH:mm:ss');
   
-      // const pagosDelDia = pagosTotales.filter((item) => {
-      //   const fechaPago = new Date(item.fechaEntrega).toISOString().split('T')[0];
-      //   return fechaPago === fechaActual;
-      // });
-
       const pagosDelDia = pagosTotales.filter((item) => {
-        const fechaPago = moment(item.fechaEntrega).tz('America/Bogota').format('YYYY-MM-DD HH:mm:ss');
+        const fechaPago = new Date(item.fechaEntrega).toISOString().split('T')[0];
         return fechaPago === fechaActual;
       });
+
+      // const pagosDelDia = pagosTotales.filter((item) => {
+      //   const fechaPago = moment(item.fechaEntrega).tz('America/Bogota').format('YYYY-MM-DD HH:mm:ss');
+      //   return fechaPago === fechaActual;
+      // });
   
       pagosDelDia.forEach((item) => {
         suma += +item.precio;
