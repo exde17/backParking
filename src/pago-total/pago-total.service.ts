@@ -10,7 +10,7 @@ import { PagoParcial } from 'src/pago-parcial/entities/pago-parcial.entity';
 import { PagoMa } from 'src/pago-mas/entities/pago-ma.entity';
 import { DataSource } from 'typeorm';
 import { Historial } from 'src/historial/entities/historial.entity';
-import moment from 'moment-timezone';
+// import moment from 'moment-timezone';
 
 @Injectable()
 export class PagoTotalService {
@@ -239,19 +239,19 @@ async sumaTotal() {
   let suma = 0;
   try {
     const pagosTotales = await this.historialRepository.find();
-    // const fechaActual = new Date().toISOString().split('T')[0]; // Obtener la fecha actual en formato YYYY-MM-DD
+    const fechaActual = new Date().toISOString().split('T')[0]; // Obtener la fecha actual en formato YYYY-MM-DD
     // Obtener la fecha y hora actual en la zona horaria de Colombia
-    const fechaActual = moment.tz('America/Bogota').format('YYYY-MM-DD HH:mm:ss');
-
-    // const pagosDelDia = pagosTotales.filter((item) => {
-    //   const fechaPago = new Date(item.createdAt).toISOString().split('T')[0];
-    //   return fechaPago === fechaActual;
-    // });
+    // const fechaActual = moment.tz('America/Bogota').format('YYYY-MM-DD HH:mm:ss');
 
     const pagosDelDia = pagosTotales.filter((item) => {
-      const fechaPago = moment(item.createdAt).tz('America/Bogota').format('YYYY-MM-DD');
+      const fechaPago = new Date(item.createdAt).toISOString().split('T')[0];
       return fechaPago === fechaActual;
     });
+
+    // const pagosDelDia = pagosTotales.filter((item) => {
+    //   const fechaPago = moment(item.createdAt).tz('America/Bogota').format('YYYY-MM-DD');
+    //   return fechaPago === fechaActual;
+    // });
 
     pagosDelDia.forEach((item) => {
       suma += +item.valor;
