@@ -240,7 +240,7 @@ async sumaTotal() {
   try {
     const pagosTotales = await this.historialRepository.find();
     // const fechaActual = new Date().toISOString().split('T')[0]; // Obtener la fecha actual en formato YYYY-MM-DD
-  
+    console.log('pagos totales: ',pagosTotales)
     // const pagosDelDia = pagosTotales.filter((item) => {
     //   const fechaPago = new Date(item.createdAt).toISOString().split('T')[0];
     //   return fechaPago === fechaActual;
@@ -254,6 +254,7 @@ async sumaTotal() {
       const fechaPago = moment(item.createdAt).tz('America/Bogota').format('YYYY-MM-DD');
       return fechaPago === fechaActual;
     });
+    
     console.log('pagos del dia: ',pagosDelDia)
 
     pagosDelDia.forEach((item) => {
