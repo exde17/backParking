@@ -248,11 +248,13 @@ async sumaTotal() {
 
     // Obtener la fecha y hora actual en la zona horaria de Colombia
     const fechaActual = moment().tz('America/Bogota').format('YYYY-MM-DD');
+    console.log('fecha actual: ',fechaActual)
 
     const pagosDelDia = pagosTotales.filter((item) => {
       const fechaPago = moment(item.createdAt).tz('America/Bogota').format('YYYY-MM-DD');
       return fechaPago === fechaActual;
     });
+    console.log('pagos del dia: ',pagosDelDia)
 
     pagosDelDia.forEach((item) => {
       suma += +item.valor;
