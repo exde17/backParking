@@ -270,7 +270,7 @@ async sumaTotal() {
   let suma = 0;
   try {
     const pagosTotales = await this.historialRepository.find();
-    console.log('Pagos totales: ', pagosTotales);
+    // console.log('Pagos totales: ', pagosTotales);
 
     // Obtener la fecha y hora actual en la zona horaria de Colombia
     const fechaActual = moment().tz('America/Bogota').format('YYYY-MM-DD');
@@ -281,10 +281,10 @@ async sumaTotal() {
     });
   
       pagosDelDia.forEach((item) => {
-        suma += +item.valor;
+        suma = (+ suma)+(+ item.valor);
       });
 
-    console.log('Pagos del día: ', pagosDelDia);
+    console.log('Pagos del día: ', suma);
 
     pagosDelDia.forEach((item) => {
       suma += +item.valor;
