@@ -278,7 +278,7 @@ async sumaTotal() {
 
     const pagosDelDia = pagosTotales.filter((item) => {
       // Convertir la fecha de createdAt a la zona horaria de Colombia y obtener solo la parte de la fecha
-      const fechaPago = moment(item.createdAt).tz('America/Bogota').format('YYYY-MM-DD');
+      const fechaPago = new Date(item.createdAt).toISOString().split('T')[0];
       console.log(`Comparando fechaPago: ${fechaPago} con fechaActual: ${fechaActual}`);
 
       if (fechaPago === fechaActual) {
