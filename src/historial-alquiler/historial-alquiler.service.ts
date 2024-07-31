@@ -100,7 +100,7 @@ export class HistorialAlquilerService {
     const fechaActual = moment().tz('America/Bogota').format('YYYY-MM-DD');
 
     const pagosDelDia = pagosTotales.filter((item) => {
-      const fechaPago = moment(item.fechaEntrega).tz('America/Bogota').format('YYYY-MM-DD');
+      const fechaPago = new Date(item.fechaEntrega).toISOString().split('T')[0];
       return fechaPago === fechaActual;
     });
   
