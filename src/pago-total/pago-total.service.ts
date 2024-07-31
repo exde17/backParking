@@ -252,13 +252,9 @@ async sumaTotal() {
       return fechaPago === fechaActual;
     });
 
-    console.log('Pagos del día: ', pagosDelDia);
-
     pagosDelDia.forEach((item) => {
       suma += +item.valor;
     });
-
-    console.log('Suma total de pagos del día: ', suma);
 
     return {
       'totalPagos': suma.toLocaleString('es-ES')
