@@ -234,38 +234,66 @@ export class PagoTotalService {
   }
 
   // suma de pagos totales del día actual
+// async sumaTotal() {
+//   // const moment = require('moment-timezone');
+//   let suma = 0;
+//   try {
+//     const pagosTotales = await this.historialRepository.find();
+    
+//     console.log('pagos totales: ',pagosTotales)
+    
+
+//     // Obtener la fecha y hora actual en la zona horaria de Colombia
+//     const fechaActual = moment().tz('America/Bogota').format('YYYY-MM-DD');
+//     console.log('fecha actual: ',fechaActual)
+
+//     const pagosDelDia = pagosTotales.filter((item) => {
+//       const fechaPago = moment(item.createdAt).tz('America/Bogota').format('YYYY-MM-DD');
+//       return fechaPago === fechaActual;
+//     });
+    
+//     console.log('pagos del dia: ',pagosDelDia)
+
+//     pagosDelDia.forEach((item) => {
+//       suma += +item.valor;
+//     });
+
+//     return {
+//       'totalPagos': suma.toLocaleString('es-ES')
+//     };
+//   } catch (error) {
+//     return error;
+//   }
+// }
+
 async sumaTotal() {
-  // const moment = require('moment-timezone');
   let suma = 0;
   try {
     const pagosTotales = await this.historialRepository.find();
-    // const fechaActual = new Date().toISOString().split('T')[0]; // Obtener la fecha actual en formato YYYY-MM-DD
-    console.log('pagos totales: ',pagosTotales)
-    // const pagosDelDia = pagosTotales.filter((item) => {
-    //   const fechaPago = new Date(item.createdAt).toISOString().split('T')[0];
-    //   return fechaPago === fechaActual;
-    // });
+    console.log('Pagos totales: ', pagosTotales);
 
-    // Obtener la fecha y hora actual en la zona horaria de Colombia
+    // Obtener la fecha actual en la zona horaria de Colombia
     const fechaActual = moment().tz('America/Bogota').format('YYYY-MM-DD');
-    console.log('fecha actual: ',fechaActual)
+    console.log('Fecha actual: ', fechaActual);
 
     const pagosDelDia = pagosTotales.filter((item) => {
       const fechaPago = moment(item.createdAt).tz('America/Bogota').format('YYYY-MM-DD');
+      console.log(`Comparando fechaPago: ${fechaPago} con fechaActual: ${fechaActual}`);
       return fechaPago === fechaActual;
     });
-    
-    console.log('pagos del dia: ',pagosDelDia)
+
+    console.log('Pagos del día: ', pagosDelDia);
 
     pagosDelDia.forEach((item) => {
       suma += +item.valor;
     });
 
     return {
-      'totalPagos': suma.toLocaleString('es-ES')
+      totalPagos: suma.toLocaleString('es-ES')
     };
   } catch (error) {
-    return error;
+    console.error('Error: ', error);
+    return { error: error.message };
   }
 }
 
