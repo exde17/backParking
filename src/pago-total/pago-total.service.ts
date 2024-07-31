@@ -270,27 +270,33 @@ async sumaTotal() {
   let suma = 0;
   try {
     const pagosTotales = await this.historialRepository.find();
-    // console.log('Pagos totales: ', pagosTotales);
+    console.log('Pagos totales: ', pagosTotales);
 
-    // Obtener la fecha y hora actual en la zona horaria de Colombia
+    // Obtener la fecha actual en la zona horaria de Colombia y formatearla sin la hora
     const fechaActual = moment().tz('America/Bogota').format('YYYY-MM-DD');
+    console.log('Fecha actual: ', fechaActual);
 
     const pagosDelDia = pagosTotales.filter((item) => {
+      // Convertir la fecha de createdAt a la zona horaria de Colombia y obtener solo la parte de la fecha
       const fechaPago = moment(item.createdAt).tz('America/Bogota').format('YYYY-MM-DD');
+      console.log(`Comparando fechaPago: ${fechaPago} con fechaActual: ${fechaActual}`);
+
+      if (fechaPago === fechaActual) {
+        console.log(`Fecha coincidida: ${fechaPago}`);
+      } else {
+        console.log(`Fecha no coincidida: ${fechaPago}`);
+      }
+
       return fechaPago === fechaActual;
     });
-  
-      pagosDelDia.forEach((item) => {
-        suma = (+ suma)+(+ item.valor);
-      });
 
-    
+    console.log('Pagos del día: ', pagosDelDia);
 
     pagosDelDia.forEach((item) => {
       suma += +item.valor;
     });
-    console.log('numero: ', pagosDelDia.length);
-    console.log('Pagos del día: ', suma);
+
+    console.log('Suma total de pagos del día: ', suma);
 
     return {
       'totalPagos': suma.toLocaleString('es-ES')
