@@ -284,11 +284,13 @@ async sumaTotal() {
         suma = (+ suma)+(+ item.valor);
       });
 
-    console.log('Pagos del día: ', suma);
+    
 
     pagosDelDia.forEach((item) => {
       suma += +item.valor;
     });
+    console.log('numero: ', pagosDelDia.length);
+    console.log('Pagos del día: ', suma);
 
     return {
       'totalPagos': suma.toLocaleString('es-ES')
