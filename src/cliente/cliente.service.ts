@@ -127,7 +127,7 @@ export class ClienteService {
 
   async update(id: string, updateClienteDto: UpdateClienteDto) {
     try {
-      const cliente = await this.clienteRepository.update(id, updateClienteDto)
+      await this.clienteRepository.update(id, updateClienteDto)
       return {
         message: 'Cliente actualizado con exito',
         // cliente
