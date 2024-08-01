@@ -21,6 +21,13 @@ export class ClienteController {
     return this.clienteService.findAll();
   }
 
+  //traigo todos los clientes mensuales
+  @Get('mensuales')
+  @Auth(ValidRoles.admin)
+  async findAllMensuales() {
+    return this.clienteService.findAllMensuales();
+  }
+
   @Get(':id')
   @Auth(ValidRoles.admin)
   findOne(@Param('id',ParseUUIDPipe) id: string) {

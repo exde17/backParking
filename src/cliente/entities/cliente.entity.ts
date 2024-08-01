@@ -57,6 +57,13 @@ export class Cliente {
     })
     novedad: boolean 
 
+    @Column('bool',{
+        nullable: true,
+        default: false,
+        name: 'pago_mensual'
+    })
+    pagoMensual: boolean
+
     @Column('timestamp', {
         nullable: true,
         default: () => "timezone('America/Bogota', now())",

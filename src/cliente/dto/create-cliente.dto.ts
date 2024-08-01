@@ -1,4 +1,4 @@
-import { IsNumber, IsOptional, IsString } from "class-validator";
+import { IsBoolean, IsNumber, IsOptional, IsString } from "class-validator";
 
 export class CreateClienteDto {
     @IsString()
@@ -22,4 +22,8 @@ export class CreateClienteDto {
     @IsString()
     @IsOptional()
     readonly guarda?: string;
+
+    @IsBoolean()
+    @IsOptional()
+    readonly pagoMes?: boolean;
 }

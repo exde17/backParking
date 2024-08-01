@@ -110,7 +110,69 @@ export class ClienteService {
     }
   }
   
+  //traigo todos los clientes mensuales
+  async findAllMensuales() {
+    try {
+      // Obtener los clientes ordenados por nombre
+      const clientes = await this.clienteRepository.find({
+        where: { pagoMensual: true },
+        order: {
+          nombre: 'ASC', // Asegurar la ordenación por nombre ascendente
+        },
+      });
   
+      const data = await Promise.all(clientes.map(async (item) => {
+        let opera = 0;
+  
+        const debe = await this.pagoParcialRepository.findOne({
+          where: {
+            cliente: { id: item.id },
+          },
+        });
+  
+        const sobra = await this.pagoMasRepository.findOne({
+          where: {
+            cliente: { id: item.id },
+          },
+        });
+  
+        // Actualizar el estado de novedad del cliente
+        item.novedad = !!debe;
+        await this.clienteRepository.update(item.id, item);
+  
+        // Verificar si el cliente ya pagó pero incompleto
+        if (debe && item.pago) {
+          // Si está incompleto devuelvo solo lo que debe sin el valor que paga diario
+          opera = +debe?.valor ?? 0;
+        } else {
+          // Si no debe, hago lo normal
+          opera = ((+(item?.valor ?? 0)) + (+(debe?.valor ?? 0))) - (+(sobra?.valor ?? 0));
+        }
+  
+        const inf = {
+          id: item.id,
+          nombre: item.nombre,
+          valor: opera,
+          novedad: item.novedad,
+          pago: item.pago,
+          isActive: item.isActive,
+        };
+  
+        return inf;
+      }));
+  
+      // Ordenar nuevamente los datos finales para asegurar que están ordenados
+      const sortedData = data.sort((a, b) => a.nombre.localeCompare(b.nombre));
+      //console.log("Datos finales ordenados:", sortedData);
+  
+      return sortedData;
+    } catch (error) {
+      return {
+        message: 'Error al obtener los clientes mensuales',
+        error,
+      };
+    }
+  }
 
   async findOne(id: string) {
     try {
@@ -161,7 +223,10 @@ export class ClienteService {
   })
   async resetearPagos() {
     // Verifico si hay clientes que no han pagado al final del día y guardo en pago parcial el valor de la deuda que es el valor del pago del cliente
-    const clientes = await this.clienteRepository.find({ where: { pago: false } });
+    const clientes = await this.clienteRepository.find({ where: { 
+      pago: false,
+      pagoMensual: false
+     } });
     for (const cliente of clientes) {
       //verifico si ya existe un registro de este cliente en pago parcial y si existe lo actualizo con la suma del valor que ya tiene mas el valor que debe
       const pagoParcialExistente = await this.pagoParcialRepository.findOne({
@@ -236,7 +301,9 @@ export class ClienteService {
 
     //si el pending de algun registro de alquiler es true el precio se aumenta al doble
     const alquiler = await this.alquilerRepository.find({
-      where: { pending: true }
+      where: { 
+        pending: true,
+       }
     });
 
     for (const item of alquiler) {
