@@ -10,7 +10,7 @@ import { PagoParcial } from 'src/pago-parcial/entities/pago-parcial.entity';
 import { PagoMa } from 'src/pago-mas/entities/pago-ma.entity';
 import { DataSource } from 'typeorm';
 import { Historial } from 'src/historial/entities/historial.entity';
-import moment from 'moment-timezone';
+import * as moment from 'moment-timezone';
 
 @Injectable()
 export class PagoTotalService {
@@ -233,23 +233,22 @@ export class PagoTotalService {
     }
   }
 
-  // suma de pagos totales del día actual
+  
+//suma de pagos del dia
 async sumaTotal() {
-  // const moment = require('moment-timezone');
   let suma = 0;
   try {
     const pagosTotales = await this.historialRepository.find();
-    // const fechaActual = new Date().toISOString().split('T')[0]; // Obtener la fecha actual en formato YYYY-MM-DD
-    // Obtener la fecha y hora actual en la zona horaria de Colombia
-    const fechaActual = moment.tz('America/Bogota').format('YYYY-MM-DD HH:mm:ss');
+    // console.log('Pagos totales: ', pagosTotales);
 
-    // const pagosDelDia = pagosTotales.filter((item) => {
-    //   const fechaPago = new Date(item.createdAt).toISOString().split('T')[0];
-    //   return fechaPago === fechaActual;
-    // });
+    // Obtener la fecha actual en la zona horaria de Colombia y formatearla sin la hora
+    const fechaActual = moment().tz('America/Bogota').format('YYYY-MM-DD');
+    // console.log('Fecha actual: ', fechaActual);
 
     const pagosDelDia = pagosTotales.filter((item) => {
-      const fechaPago = moment(item.createdAt).tz('America/Bogota').format('YYYY-MM-DD');
+      // Convertir la fecha de createdAt a la zona horaria de Colombia y obtener solo la parte de la fecha
+      const fechaPago = new Date(item.createdAt).toISOString().split('T')[0];
+      
       return fechaPago === fechaActual;
     });
 
@@ -261,7 +260,8 @@ async sumaTotal() {
       'totalPagos': suma.toLocaleString('es-ES')
     };
   } catch (error) {
-    return error;
+    console.error('Error: ', error);
+    return { error: error.message };
   }
 }
 

@@ -8,7 +8,7 @@ import { Alquiler } from 'src/alquiler/entities/alquiler.entity';
 import { DataSource } from 'typeorm';
 import { FiltroFechaDto } from 'src/historial/dto/filtroFecha.dto';
 import { format } from 'date-fns';
-import moment from 'moment-timezone';
+import * as moment from 'moment-timezone';
 
 @Injectable()
 export class HistorialAlquilerService {
@@ -19,39 +19,6 @@ export class HistorialAlquilerService {
     private readonly alquilerRepository: Repository <Alquiler>,
     private dataSource: DataSource
   ){}
-
-  // async create(createHistorialAlquilerDto: CreateHistorialAlquilerDto) {
-  //   try {
-  //     const alquiler = await this.alquilerRepository.findOne({
-  //       where:{
-  //         id: createHistorialAlquilerDto.idAlquiler
-  //       }
-  //     });
-
-  //     if(!alquiler){
-  //       return {
-  //         throw: 'No se encontro el alquiler'
-  //       }
-  //     }
-
-  //     const history = this.historyRepository.create({
-  //       nombreCliente: alquiler.nombreCliente,
-  //       tipo: alquiler.tipo,
-  //       precio: alquiler.precio,
-  //       fechaSalida: alquiler.entradadAt
-  //     });
-
-  //     await this.historyRepository.save(history);
-
-  //     return {
-  //       message: 'Historial de alquiler creado con exito'
-  //     }
-
-  //   } catch (error) {
-  //     throw error
-      
-  //   }
-  // }
 
   async create(id: string) {
     const queryRunner = this.dataSource.createQueryRunner();
@@ -124,23 +91,18 @@ export class HistorialAlquilerService {
 
   //suma de alquileres pagos del dia
   async sumaAlquileres() {
-    // const moment = require('moment-timezone');
+   
     let suma = 0;
     try {
       const pagosTotales = await this.historyRepository.find();
-      // const fechaActual = new Date().toISOString().split('T')[0]; // Obtener la fecha actual en formato YYYY-MM-DD
+      
       // Obtener la fecha y hora actual en la zona horaria de Colombia
-      const fechaActual = moment.tz('America/Bogota').format('YYYY-MM-DD HH:mm:ss');
-  
-      // const pagosDelDia = pagosTotales.filter((item) => {
-      //   const fechaPago = new Date(item.fechaEntrega).toISOString().split('T')[0];
-      //   return fechaPago === fechaActual;
-      // });
+    const fechaActual = moment().tz('America/Bogota').format('YYYY-MM-DD');
 
-      const pagosDelDia = pagosTotales.filter((item) => {
-        const fechaPago = moment(item.fechaEntrega).tz('America/Bogota').format('YYYY-MM-DD HH:mm:ss');
-        return fechaPago === fechaActual;
-      });
+    const pagosDelDia = pagosTotales.filter((item) => {
+      const fechaPago = new Date(item.fechaEntrega).toISOString().split('T')[0];
+      return fechaPago === fechaActual;
+    });
   
       pagosDelDia.forEach((item) => {
         suma += +item.precio;
