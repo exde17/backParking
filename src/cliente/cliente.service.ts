@@ -91,6 +91,7 @@ export class ClienteService {
           novedad: item.novedad,
           pago: item.pago,
           isActive: item.isActive,
+          pagoMensual: item.pagoMensual,
         };
   
         return inf;
