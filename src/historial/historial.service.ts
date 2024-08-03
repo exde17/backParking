@@ -106,6 +106,39 @@ export class HistorialService {
     }
   }
 
+  //eliminar ultimo registro de historial por cliente
+  async deleteLastHistorialByClient(id: string) {
+    try {
+      const historial = await this.historialRepository.findOne({
+        where: {
+          cliente: {
+            id
+          }
+        },
+        order: {
+          createdAt: 'DESC'
+        }
+      });
+
+      if (!historial) {
+        return {
+          message: 'No se encontró historial para el cliente'
+        };
+      }
+
+      await this.historialRepository.delete(historial.id);
+
+      return {
+        message: 'ultimo pago eliminado correctamente'
+      };
+    } catch (error) {
+      return {
+        message: 'Error en el servidor',
+        error: error
+      };
+    }
+  }
+
   findOne(id: number) {
     return `This action returns a #${id} historial`;
   }
