@@ -28,6 +28,13 @@ export class AlquilerController {
     return this.alquilerService.updatePendiente(id);
   }
 
+  //actualizar el estado de ispaused
+  @Patch('ispaused/:id')
+  @Auth(ValidRoles.admin)
+  updateIsPaused(@Param('id',ParseUUIDPipe) id: string) {
+    return this.alquilerService.updateIsPaused(id);
+  }
+
   @Get(':id')
   @Auth(ValidRoles.admin)
   findOne(@Param('id', ParseUUIDPipe) id: string) {

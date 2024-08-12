@@ -117,4 +117,25 @@ export class AlquilerService {
       }
     }
   }
+
+  //actualizar el estado de ispaused
+  async updateIsPaused(id: string) {
+    try {
+      const res = await this.alquilerRepository.findOne({
+        where: {
+          id: id
+        }
+      });
+       res.ispaused = !res.ispaused;
+      await this.alquilerRepository.save(res);
+      return {
+        message: 'Alquiler en pausa'
+      }
+    } catch (error) {
+      return {
+        message: 'Error al actualizar alquiler',
+        error: error
+      }
+    }
+  }
 }

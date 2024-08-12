@@ -45,4 +45,10 @@ export class Alquiler {
             default: false
         })
         pending: boolean;
+
+        @Column('bool',{
+            nullable: false,
+            default: false
+        })
+        ispaused: boolean;
 }

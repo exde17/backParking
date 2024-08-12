@@ -91,6 +91,7 @@ export class ClienteService {
           novedad: item.novedad,
           pago: item.pago,
           isActive: item.isActive,
+          pagoMensual: item.pagoMensual,
         };
   
         return inf;
@@ -299,7 +300,7 @@ export class ClienteService {
       }
     }
 
-    //si el pending de algun registro de alquiler es true el precio se aumenta al doble
+    //si el pending es true y el isPause es false de algun registro de alquiler el precio se aumenta al doble
     const alquiler = await this.alquilerRepository.find({
       where: { 
         pending: true,

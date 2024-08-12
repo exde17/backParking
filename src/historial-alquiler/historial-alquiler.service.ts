@@ -50,6 +50,8 @@ export class HistorialAlquilerService {
       alquiler.isActive = false;
       //actualizo el estado de pendiente
       alquiler.pending = false;
+      //actualizo el estado de ispaused
+      alquiler.ispaused = false;
       //actualizo el precio por si las moscas
       alquiler.precio = 5000;
       await queryRunner.manager.save(alquiler);

@@ -25,5 +25,5 @@ export class CreateClienteDto {
 
     @IsBoolean()
     @IsOptional()
-    readonly pagoMes?: boolean;
+    readonly pagoMensual?: boolean;
 }
