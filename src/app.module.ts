@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigType } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './user/user.module';
 import { ClienteModule } from './cliente/cliente.module';
@@ -11,25 +11,36 @@ import { ParqueoModule } from './parqueo/parqueo.module';
 import { HistorialParqueoModule } from './historial-parqueo/historial-parqueo.module';
 import { AlquilerModule } from './alquiler/alquiler.module';
 import { HistorialAlquilerModule } from './historial-alquiler/historial-alquiler.module';
+import config from './config';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
-    TypeOrmModule.forRoot({
-      // ssl: process.env.STAGE === 'prod',
-      // extra: {
-      //   ssl:
-      //     process.env.STAGE === 'prod' ? { rejectUnauthorized: false } : null,
-      // },
-      type: 'postgres',
-      host: process.env.DB_HOST,
-      port: parseInt(process.env.DB_PORT),
-      username: process.env.DB_USERNAME,
-      // password: `${process.env.DB_PASSWORD}`,
-      database: process.env.DB_NAME,
-      autoLoadEntities: true,
-      synchronize: true,
+    ConfigModule.forRoot({
+      envFilePath: '.env',
+      load: [config],
+      isGlobal: true,
+      // validationSchema: Joi.object({
+      //   JWT_SECRET: Joi.string().required(),
+      //   DB_NAME: Joi.string().required(),
+      //   DB_PORT: Joi.number().required(),
+      //   DB_HOST: Joi.string().required(),
+      //   DB_PASSWORD: Joi.string().required(),
+      //   DB_USERNAME: Joi.string().required(),
+      // }),
     }),
+    TypeOrmModule.forRootAsync({
+      inject: [config.KEY],
+      useFactory: (configService: ConfigType<typeof config>) => ({
+        type: 'postgres',
+        host: configService.database.dbHost,
+        port: configService.database.dbPort,
+        username: configService.database.dbUsername,
+        password: configService.database.dbPassword,
+        database: configService.database.dbName,
+        autoLoadEntities: true,
+        synchronize: true,
+      }),
+      }),
     UserModule,
     ClienteModule,
     PagoParcialModule,
